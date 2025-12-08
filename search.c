@@ -10,7 +10,7 @@
  */
 
 #include "search.h"
-
+#include "permutations.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -58,14 +58,19 @@ void potential_key_generator(int *keys, int n_keys, int max)
 
 PDICT init_dictionary (int size, char order)
 {
-  int* num = NULL;
-  num = (int*) malloc(sizeof(int) * size);
-  if(num == NULL) return NULL;
-    PDICT pdict;
+  int* table = NULL;
+  PDICT pdict = NULL;
+  pdict = (PDICT) malloc(sizeof(DICT));
+  table = (int*) malloc(size * sizeof(int));
+  if(table == NULL){
+    free(pdict);
+    return NULL;
+  }
     pdict->n_data = 0;
     pdict->order = order;
     pdict->size = size;
-    pdict->table = num;
+    pdict->table = table;
+    
 
   return pdict;
 }
@@ -79,7 +84,7 @@ void free_dictionary(PDICT pdict)
 
 int insert_dictionary(PDICT pdict, int key)
 {
-  int j, P, U, i;
+  int j, U, i;
   int* table;
   char order;
   order = pdict->order;
@@ -130,7 +135,7 @@ int bin_search(int *table,int F,int L,int key, int *ppos)
   ob++;
   if(key == table[m]){
     *ppos = m;
-    return;
+    return 0;
   }
   if(key > table[m]){
     ob += bin_search(table, m+1, L, key, ppos);
@@ -166,7 +171,7 @@ int lin_auto_search(int *table,int F,int L,int key, int *ppos)
     ob++;
     if(table[i] == key){
       if(i>0){
-        swap(table[i], table[i-1]);
+        swap(&table[i], &table[i-1]);
       }
       *ppos = i;
     }

@@ -52,9 +52,9 @@ int main(int argc, char** argv)
       fprintf(stderr, "Parameter %s is invalid\n", argv[i]);
     }
   }
-
+ 
   pdict = init_dictionary(size,NOT_SORTED);
-
+printf("Llegaste\n");
   if (pdict == NULL) {
     /* error */
     printf("Error: Dictionary could not be initialized\n");
