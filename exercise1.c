@@ -12,10 +12,10 @@
 /* Output: 0: OK, -1: ERR                      */
 /***********************************************/
 
-#include<stdlib.h>
-#include<stdio.h>
-#include<string.h>
-#include<time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
 
 #include "permutations.h"
 #include "search.h"

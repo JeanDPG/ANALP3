@@ -58,44 +58,123 @@ void potential_key_generator(int *keys, int n_keys, int max)
 
 PDICT init_dictionary (int size, char order)
 {
-	/* your code */
+  PDICT pdict;
+  pdict->size = size;
+  pdict->n_data = 0;
+  pdict->order = order;
+
+  pdict->table = (int*) malloc(size * sizeof(int));
+  if (pdict->table == NULL) {
+    free(pdict);
+    return NULL;
+  }
+
+  return pdict;
 }
 
 void free_dictionary(PDICT pdict)
 {
-	/* your code */
+  free(pdict->table);
+  free(pdict);
 }
 
 int insert_dictionary(PDICT pdict, int key)
 {
-	/* your code */
+  int i;
+
+  if (pdict->order == NOT_SORTED) {
+    pdict->table[pdict->n_data]=key;
+    pdict->n_data++;
+  } else {
+    int U = pdict->n_data;
+    int P = 0, j, A, i;
+    int *T = pdict->table;
+
+    for (i = P+1; i < U; i++) {
+      A = T[U];
+      j = U-1;
+      while (j >= P && T[j] > A) {
+        T[j+1] = T[j];
+        j--;
+      }
+        T[j+1] = A;
+    }
+  }
+  
+  return OK;
 }
 
-int massive_insertion_dictionary (PDICT pdict,int *keys, int n_keys)
+int massive_insertion_dictionary(PDICT pdict,int *keys, int n_keys)
 {
-	/* your code */
+  int i;
+
+	for (i = 0; i < n_keys; i++)
+  {
+    if (insert_dictionary(pdict, keys[i]) != OK)
+      return ERR;
+  }
+  
+  return OK;
 }
 
 int search_dictionary(PDICT pdict, int key, int *ppos, pfunc_search method)
 {
-	/* your code */
+  return method(pdict->table, 0, pdict->n_data, key, ppos);
 }
-
 
 /* Search functions of the Dictionary ADT */
 int bin_search(int *table,int F,int L,int key, int *ppos)
 {
-	/* your code */
+  int m, ob = 0;
+  *ppos = NOT_FOUND;
+
+  if (key == table[m]) {
+    *ppos = m;
+    return;
+  }
+
+  if (key < table[m]) {
+    ob++;
+    bin_search(table, F, m, key, ppos);
+  } else {
+    ob++;
+    bin_search(table, m + 1, L, key, ppos);
+  }
+
+  return ob;
 }
 
 int lin_search(int *table,int F,int L,int key, int *ppos)
 {
-	/* your code */
+  int length = L-F, i, ob = 0;
+  *ppos = NOT_FOUND;
+
+  for (i = 0; i < length; i++)
+  {
+    ob++;
+    if (table[i] == key) {
+      *ppos = i;
+    }
+  }
+  
+  return ob;
 }
 
 int lin_auto_search(int *table,int F,int L,int key, int *ppos)
 {
-	/* your code */
+  int length = L-F, i = 0, ob = 0;
+  *ppos = NOT_FOUND;
+
+  for (i = 0; i < length; i++)
+  {
+    ob++;
+    if (table[i] == key) {
+      if (i > 0) {
+        swap(table[i], table[i-1]);
+      }
+      *ppos = i;
+    }
+  }
+  
+  return ob;
 }
-
-
