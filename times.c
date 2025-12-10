@@ -18,19 +18,7 @@
 #include <stdio.h>
 
 
-    /*
-1. Crear un diccionario de tama˜no N.
-2. Crear una permutaci´on de tama˜no N mediante la rutina generate perm.
-3. Insertar en el diccionario los elementos de la permutaci´on anterior mediante el uso de la funci´on int massive insertion dictionary .
-4. Reservar memoria para la tabla que va a contener las n times*N claves en el rango 1 a N a buscar.
-
-5. Llenar la tabla anterior con las n times*N claves a buscar mediante el uso del generador de claves. (Aviso:
-los generadores de claves generan n´umeros de 1 a N, por tanto es importante que vuestras
-permutaciones tambi´en sean de los n´umeros de 1 a N).
-6. Medir el tiempo (reloj y OBs) que tarda en buscar las n times*N claves almacenadas en la tabla anterior.
-7. Rellenar correctamente los campos de la estructura ptime.
-8. Liberar memoria y salir.
-*/
+  
 short average_search_time(pfunc_search method, pfunc_key_generator generator,
 char order,
 int N,
