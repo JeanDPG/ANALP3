@@ -37,9 +37,14 @@ int N,
 int n_times,
 PTIME_AA ptime){
   PDICT dic = NULL;
-  int* perm,*keys = NULL, pos;
+  int* perm,*keys = NULL, pos = 0;
   int start,stop,i,ob_current, ob_min=-1, ob_max=-1;
   double time=0, ob_average=0;
+  
+  ptime->N = N;
+  ptime->n_elems = N * n_times;
+  ptime->average_ob = 0;
+
 
   dic = init_dictionary(N, order);
     if (dic == NULL) return ERR;
@@ -56,14 +61,14 @@ PTIME_AA ptime){
     }
   if(!(keys = (int*)malloc((n_times*N) * sizeof(int)))){
      free_dictionary(dic);
-      free(perm);
+     free(perm);
     return ERR;
   }
-  generator(keys,n_times*N, N);
+  generator(keys,ptime->n_elems, N);
   start = clock();
-    for (i = 0; i < n_times * N; i++) {
+    for (i = 0; i < ptime->n_elems; i++) {
         
-        ob_current = method(dic->table,0 ,N-1, keys[i], &pos);
+        ob_current = search_dictionary(dic, keys[i], &pos, method);
         ob_average+=ob_current;
        
         if (i == 0) {            
@@ -75,11 +80,11 @@ PTIME_AA ptime){
         }
     }
     stop = clock();
-  time+=((double)(stop - start)) / CLOCKS_PER_SEC;
-    ptime->N = N;
-    ptime->n_elems = n_times * N;
-    ptime->time = ((double)(stop - start)) / CLOCKS_PER_SEC; 
-    ptime->average_ob = ob_average / (n_times * N); 
+    time+=((double)(stop - start)) / CLOCKS_PER_SEC;
+    
+    
+    ptime->time = ((double)(stop - start)) / CLOCKS_PER_SEC / ptime->n_elems; 
+    ptime->average_ob = ob_average / (ptime->n_elems); 
     ptime->min_ob = ob_min;
     ptime->max_ob = ob_max;
 
