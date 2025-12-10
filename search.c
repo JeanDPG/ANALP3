@@ -151,19 +151,19 @@ int bin_search(int *table, int F, int L, int key, int *ppos) {
     }
 }
 
-int lin_search(int *table,int F,int L,int key, int *ppos)
+int lin_search(int *table, int F, int L, int key, int *ppos)
 {
-	int i, ob = 0;
-  *ppos = NOT_FOUND;
-  
-  for ( i = F; i < L; i++)
+  int i = 0, ob = 0;
+  for (i = F; i <= L; i++)
   {
     ob++;
-    if(table[i] == key){
+    if (table[i] == key)
+    {
       *ppos = i;
       return ob;
     }
   }
+  *ppos = NOT_FOUND;
   return ob;
 }
 

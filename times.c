@@ -38,7 +38,7 @@ int n_times,
 PTIME_AA ptime){
   PDICT dic = NULL;
   int* perm,*keys = NULL, pos = 0;
-  int start,stop,i,ob_current, ob_min=-1, ob_max=-1;
+  int start,stop,i,ob_current, ob_min=0, ob_max=0;
   double time=0, ob_average=0;
   
   ptime->N = N;
@@ -54,16 +54,17 @@ PTIME_AA ptime){
         free_dictionary(dic);
         return ERR;
     }
+    if(!(keys = (int*)malloc((n_times*N) * sizeof(int)))){
+     free_dictionary(dic);
+     free(perm);
+    return ERR;
+  }
   if (massive_insertion_dictionary(dic, perm, N) == ERR) {
         free_dictionary(dic);
         free(perm);
         return ERR;
     }
-  if(!(keys = (int*)malloc((n_times*N) * sizeof(int)))){
-     free_dictionary(dic);
-     free(perm);
-    return ERR;
-  }
+  
   generator(keys,ptime->n_elems, N);
   start = clock();
     for (i = 0; i < ptime->n_elems; i++) {
