@@ -11,14 +11,20 @@
 
 
 #include "permutations.h"
-
 #include "extern.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 int *generate_worst_case_mergesort(int N);
 void build_worst_case_recursive(int* S, int* T, int low, int high);
+
+void swap(int* a, int* b)
+{
+    int aux;
+    aux = *a;
+    *a = *b;
+    *b = aux;
+}
 /***************************************************/
 /* Function: random_num Date: 26/09/2025           */
 /* Authors: Jean del Pozo                          */
@@ -112,6 +118,7 @@ int** generate_permutations(int n_perms, int N)
 
 }
 
+
 int *generate_worst_case_mergesort(int N) {
   int i;
     int* perm = (int *)malloc(N * sizeof(int));
@@ -131,21 +138,21 @@ int *generate_worst_case_mergesort(int N) {
     
     build_worst_case_recursive(perm, temp, 0, N - 1);
 
-  
     free(temp);
     return perm;
 }
 
 void build_worst_case_recursive(int* S, int* T, int low, int high) {
-    if (low >= high) {
-        return; 
-    }
+    
 
     int mid = (low + high) / 2;
     int i, k, j;
-
    
     k = low;
+
+    if (low >= high) {
+        return; 
+    }
     for (i = low; i <= high; i += 2) {
         T[k++] = S[i];
     }

@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /***************************************************/
-/* Function: generate_permutations Date:           */
+/* Function: swap  Date:           */
 /* Authors: Jose Luis Sanchez                      */
 /*                                                 */
 /* Function that swaps two integers                */

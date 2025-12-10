@@ -18,7 +18,7 @@
   #define ERR -1
   #define OK (!(ERR))
 #endif
-
+void swap(int* a, int* b);
 int random_num(int inf, int sup);
 int* generate_perm(int N);
 int** generate_permutations(int n_perms, int N);

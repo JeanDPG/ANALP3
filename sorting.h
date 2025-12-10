@@ -36,4 +36,3 @@ int median_stat(int *tabla, int ip, int iu, int *pos);
 
 
 #endif
-

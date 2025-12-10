@@ -10,7 +10,7 @@
  */
 
 #include "search.h"
-
+#include "permutations.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -58,123 +58,137 @@ void potential_key_generator(int *keys, int n_keys, int max)
 
 PDICT init_dictionary (int size, char order)
 {
-  PDICT pdict;
-  pdict->size = size;
-  pdict->n_data = 0;
-  pdict->order = order;
-
-  pdict->table = (int*) malloc(size * sizeof(int));
-  if (pdict->table == NULL) {
+  int i;
+  int* table = NULL;
+  PDICT pdict = NULL;
+  pdict = (PDICT) malloc(sizeof(DICT));
+  table = (int*) malloc(size * sizeof(int));
+  if(table == NULL){
     free(pdict);
     return NULL;
   }
+  for (i = 0; i < size; i++)
+  {
+    table[i] = 0;
+  }
+    pdict->n_data = 0;
+    pdict->order = order;
+    pdict->size = size;
+    pdict->table = table;
+    
 
   return pdict;
 }
 
 void free_dictionary(PDICT pdict)
 {
-  free(pdict->table);
+  if (pdict == NULL)
+    return;
+
+  if (pdict->table) free(pdict->table);
+
   free(pdict);
 }
 
-int insert_dictionary(PDICT pdict, int key)
-{
-  int i;
-
-  if (pdict->order == NOT_SORTED) {
-    pdict->table[pdict->n_data]=key;
+int insert_dictionary(PDICT pdict, int key) {
+    int  A, j;
+    int* table = pdict->table;
+    char order = pdict->order;
+    table[pdict->n_data] = key;
     pdict->n_data++;
-  } else {
-    int U = pdict->n_data;
-    int P = 0, j, A, i;
-    int *T = pdict->table;
 
-    for (i = P+1; i < U; i++) {
-      A = T[U];
-      j = U-1;
-      while (j >= P && T[j] > A) {
-        T[j+1] = T[j];
-        j--;
-      }
-        T[j+1] = A;
+    A = pdict->table[pdict->n_data - 1];
+    j = pdict->n_data - 2;
+
+    if (order == SORTED) {
+       while (j >= 0 && table[j] > A)
+    {
+      table[j + 1] = table[j];
+      j--;
     }
+    table[j + 1] = A;
   }
-  
-  return OK;
+    
+    return OK;
 }
 
-int massive_insertion_dictionary(PDICT pdict,int *keys, int n_keys)
+int massive_insertion_dictionary (PDICT pdict,int *keys, int n_keys)
 {
   int i;
-
-	for (i = 0; i < n_keys; i++)
+	for ( i = 0; i < n_keys; i++)
   {
-    if (insert_dictionary(pdict, keys[i]) != OK)
-      return ERR;
+    insert_dictionary(pdict, keys[i]);
   }
-  
   return OK;
 }
 
 int search_dictionary(PDICT pdict, int key, int *ppos, pfunc_search method)
 {
-  return method(pdict->table, 0, pdict->n_data, key, ppos);
+  return method(pdict->table, 0, pdict->n_data - 1, key, ppos);
 }
 
-/* Search functions of the Dictionary ADT */
-int bin_search(int *table,int F,int L,int key, int *ppos)
-{
-  int m, ob = 0;
-  *ppos = NOT_FOUND;
 
-  if (key == table[m]) {
-    *ppos = m;
-    return;
-  }
+int bin_search(int *table, int F, int L, int key, int *ppos) {
+   int ob = 0;
+   int mid = (F + L) / 2;
 
-  if (key < table[m]) {
+    if (F > L) {
+        *ppos = NOT_FOUND;
+        return 1;  
+    }
+    
     ob++;
-    bin_search(table, F, m, key, ppos);
-  } else {
-    ob++;
-    bin_search(table, m + 1, L, key, ppos);
-  }
+    if (table[mid] == key) {
+        *ppos = mid;
+        return ob;   
+    }
 
-  return ob;
+     
+    if (key < table[mid]) {
+        return ob + bin_search(table, F, mid - 1, key, ppos);
+    } else {
+        return ob + bin_search(table, mid + 1, L, key, ppos);
+    }
 }
 
 int lin_search(int *table,int F,int L,int key, int *ppos)
 {
-  int length = L-F, i, ob = 0;
+	int i, ob = 0;
   *ppos = NOT_FOUND;
-
-  for (i = 0; i < length; i++)
+  
+  for ( i = F; i < L; i++)
   {
     ob++;
-    if (table[i] == key) {
+    if(table[i] == key){
       *ppos = i;
+      return ob;
     }
   }
-  
   return ob;
 }
 
 int lin_auto_search(int *table,int F,int L,int key, int *ppos)
 {
-  int length = L-F, i = 0, ob = 0;
+	int i, ob = 0;
+  
   *ppos = NOT_FOUND;
-
-  for (i = 0; i < length; i++)
+  for ( i = F; i < L; i++)
   {
     ob++;
-    if (table[i] == key) {
-      if (i > 0) {
-        swap(table[i], table[i-1]);
+    if(table[i] == key){
+      if (i == 0)
+      {
+        *ppos = i;
+        return ob;
       }
-      *ppos = i;
+      
+        swap(&table[i], &table[i-1]);
+        *ppos = i;
+        return ob;
     }
   }
-  
+   
   return ob;
 }
+
+

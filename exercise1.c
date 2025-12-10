@@ -12,10 +12,10 @@
 /* Output: 0: OK, -1: ERR                      */
 /***********************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+#include<time.h>
 
 #include "permutations.h"
 #include "search.h"
@@ -39,8 +39,8 @@ int main(int argc, char** argv)
   }
 
   printf("Pratice number 3, section 1\n");
-  printf("Done by: Your names\n");
-  printf("Group: Your group\n");
+  printf("Done by: José Luis Sánchez Alcalá, Jean del Pozo Gómez\n");
+  printf("Group: 1271\n");
 
   /* comprueba la linea de comandos */
   for(i = 1; i < argc; i++) {
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
       fprintf(stderr, "Parameter %s is invalid\n", argv[i]);
     }
   }
-
+ 
   pdict = init_dictionary(size,NOT_SORTED);
 
   if (pdict == NULL) {

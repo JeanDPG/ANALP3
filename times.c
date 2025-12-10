@@ -11,10 +11,120 @@
 
 #include "times.h"
 #include "sorting.h"
+#include "search.h"
 #include <time.h>
 #include "permutations.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+
+    /*
+1. Crear un diccionario de tama˜no N.
+2. Crear una permutaci´on de tama˜no N mediante la rutina generate perm.
+3. Insertar en el diccionario los elementos de la permutaci´on anterior mediante el uso de la funci´on int massive insertion dictionary .
+4. Reservar memoria para la tabla que va a contener las n times*N claves en el rango 1 a N a buscar.
+
+5. Llenar la tabla anterior con las n times*N claves a buscar mediante el uso del generador de claves. (Aviso:
+los generadores de claves generan n´umeros de 1 a N, por tanto es importante que vuestras
+permutaciones tambi´en sean de los n´umeros de 1 a N).
+6. Medir el tiempo (reloj y OBs) que tarda en buscar las n times*N claves almacenadas en la tabla anterior.
+7. Rellenar correctamente los campos de la estructura ptime.
+8. Liberar memoria y salir.
+*/
+short average_search_time(pfunc_search method, pfunc_key_generator generator,
+char order,
+int N,
+int n_times,
+PTIME_AA ptime){
+  PDICT dic = NULL;
+  int* perm,*keys = NULL, pos = 0;
+  int start,stop,i,ob_current, ob_min=-1, ob_max=-1;
+  double time=0, ob_average=0;
+  
+  ptime->N = N;
+  ptime->n_elems = N * n_times;
+  ptime->average_ob = 0;
+
+
+  dic = init_dictionary(N, order);
+    if (dic == NULL) return ERR;
+  
+  perm = generate_perm(N);
+  if (perm == NULL) {
+        free_dictionary(dic);
+        return ERR;
+    }
+  if (massive_insertion_dictionary(dic, perm, N) == ERR) {
+        free_dictionary(dic);
+        free(perm);
+        return ERR;
+    }
+  if(!(keys = (int*)malloc((n_times*N) * sizeof(int)))){
+     free_dictionary(dic);
+     free(perm);
+    return ERR;
+  }
+  generator(keys,ptime->n_elems, N);
+  start = clock();
+    for (i = 0; i < ptime->n_elems; i++) {
+        
+        ob_current = search_dictionary(dic, keys[i], &pos, method);
+        ob_average+=ob_current;
+       
+        if (i == 0) {            
+          ob_min = ob_current;
+          ob_max = ob_current;
+        } else {
+          if (ob_current < ob_min) ob_min = ob_current;
+          if (ob_current > ob_max) ob_max = ob_current;
+        }
+    }
+    stop = clock();
+    time+=((double)(stop - start)) / CLOCKS_PER_SEC;
+    
+    
+    ptime->time = ((double)(stop - start)) / CLOCKS_PER_SEC / ptime->n_elems; 
+    ptime->average_ob = ob_average / (ptime->n_elems); 
+    ptime->min_ob = ob_min;
+    ptime->max_ob = ob_max;
+
+    free_dictionary(dic);
+    free(perm);
+    free(keys);
+
+    return OK;
+
+}
+
+
+short generate_search_times(pfunc_search method, pfunc_key_generator generator,
+char order, char* file, int num_min, int num_max, int incr, int n_times){
+
+  int num, i, ntimes = (num_max - num_min)/incr + 1;
+  PTIME_AA ptimes;
+
+  if(!(ptimes=malloc(sizeof(ptimes[0])*ntimes))){
+    return ERR;
+  }
+
+  for ( num = num_min, i = 0; num <= num_max; i++, num += incr)
+  {
+    if(average_search_time(method, generator, order, num, n_times, &ptimes[i])!=OK){
+      free(ptimes);
+      return ERR;
+    }
+  }
+  
+  if(save_time_table(file, ptimes, ntimes)!= OK){
+    free(ptimes);
+    return ERR;
+  }
+
+  free(ptimes);
+  return OK;
+    
+}
+
 
 
 /***************************************************/
@@ -102,7 +212,7 @@ short average_sorting_time(pfunc_sort metodo,
 /* ERR: if there were problems with parameters or  */
 /* mallocs                                         */
 /* OK: if the function called saved_time_table to  */
-/*     wirte                                       */   
+/*     write                                       */   
 /***************************************************/
 short generate_sorting_times(pfunc_sort method, char* file, 
                                 int num_min, int num_max, 
@@ -124,11 +234,11 @@ short generate_sorting_times(pfunc_sort method, char* file,
     }
   }
   
-  if(save_time_table(file, ptimes, n_times) !=OK){
+  if(save_time_table(file, ptimes, n_times)!= OK){
     free(ptimes);
-  return ERR;
+    return ERR;
   }
-  
+
   free(ptimes);
   return OK;
 }
@@ -171,120 +281,4 @@ short save_time_table(char* file, PTIME_AA ptime, int n_times)
 
 }
 
-/*****************************************************/
-/* Function: generate_search_times Date: 08/12/2025  */
-/* Authors: José Luis Sánchez                        */
-/*                                                   */
-/* Function that measures search times across a      */
-/* range of dictionary sizes, calling                */
-/* average_search_time for each size and saving      */
-/* results to a file                                 */
-/*                                                   */
-/* Input:                                            */
-/* pfunc_search method: pointer to a search func     */
-/* pfunc_key_generator generator: key generator fn   */
-/* int order: dictionary ordering (SORTED/NOT)       */
-/* char* file: file to save timing results           */
-/* int num_min: minimum dictionary size              */
-/* int num_max: maximum dictionary size              */
-/* int incr: size increment step                     */
-/* int n_times: number of searches to perform        */
-/* Output:                                           */
-/* ERR: if memory allocation or file save failed     */
-/* OK: if all measurements completed successfully    */
-/*****************************************************/
-short generate_search_times(pfunc_search method, pfunc_key_generator generator, 
-                                int order, char* file, 
-                                int num_min, int num_max, 
-                                int incr, int n_times)
-{
-  int i, num, n_sizes = (num_max - num_min)/incr + 1;
-  PTIME_AA ptimes;
 
-  if(!(ptimes=malloc(sizeof(ptimes[0])*n_sizes))){
-    return ERR;
-  }
-
-  for ( num = num_min, i = 0; num <= num_max; i++, num += incr)
-  {
-    if(average_search_time(method,generator,order,num,n_times,&ptimes[i])!=OK){
-      free(ptimes);
-      return ERR;
-    }
-  }
-  
-  if(save_time_table(file, ptimes, n_sizes) !=OK){
-    free(ptimes);
-  return ERR;
-  }
-  
-  free(ptimes);
-  return OK;
-}
-
-/***************************************************/
-/* Function: average_search_time Date: 08/12/2025  */
-/* Authors: José Luis Sánchez                      */
-/*                                                 */
-/* Function that performs multiple search          */
-/* operations on a dictionary and measures time    */
-/* complexity (operation count) statistics:        */
-/* average, min, and max operations per search     */
-/*                                                 */
-/* Input:                                          */
-/* pfunc_search method: pointer to search function */
-/* pfunc_key_generator generator: key generator fn */
-/* int order: ordering type (SORTED or NOT_SORTED) */
-/* int N: size of the dictionary                   */
-/* int n_times: number of searches to perform      */
-/* PTIME_AA ptime: pointer to timing structure     */
-/* Output:                                         */
-/* ERR: if dictionary creation failed              */
-/* OK: if all searches completed and stats stored  */
-/*     in the ptime structure                      */
-/***************************************************/
-short average_search_time(pfunc_search method, pfunc_key_generator generator, 
-                              int order, int N, 
-                              int n_times, 
-                              PTIME_AA ptime)
-{
-  PDICT pdict;
-  int i, key, pos, ob_current, ob_min=0, ob_max=0;
-  double time=0, ob_average=0;
-
-  pdict = create_dictionary(N, order);
-  if (pdict == NULL) {
-    return ERR;
-  }
-
-  generate_sorted_keys(N, pdict->table);
-
-  ptime->N=N;
-  ptime->n_elems=n_times;
-  start=clock();
-  for ( i = 0; i < n_times; i++)
-  {  
-    key = generator(pdict->table, N);
-    ob_current=search_dictionary(pdict,key,&pos,method);
-    ob_average+=ob_current;
-    
-    if (i == 0) {            
-        ob_min = ob_current;
-        ob_max = ob_current;
-    } else {
-        if (ob_current < ob_min) ob_min = ob_current;
-        if (ob_current > ob_max) ob_max = ob_current;
-    }
-  }
-  stop=clock();
-  time+=((double)(stop - start)) / CLOCKS_PER_SEC;
-  ptime->time=(time+0.)/n_times;
-  ptime->average_ob=ob_average/n_times;
-  ptime->max_ob=ob_max;
-  ptime->min_ob=ob_min;
-
-  free_dictionary(pdict);
-  
-  return OK;
-
-}
