@@ -64,15 +64,14 @@ PTIME_AA ptime){
     for (i = 0; i < n_times * N; i++) {
         
         ob_current = method(dic->table,0 ,N-1, keys[i], &pos);
-        
+        ob_average+=ob_current;
        
-        ob_average += ob_current;
-        
-        if (ob_min == -1 || ob_current < ob_min) {
-            ob_min = ob_current;
-        }
-        if (ob_max == -1 || ob_current > ob_max) {
-            ob_max = ob_current;
+        if (i == 0) {            
+          ob_min = ob_current;
+          ob_max = ob_current;
+        } else {
+          if (ob_current < ob_min) ob_min = ob_current;
+          if (ob_current > ob_max) ob_max = ob_current;
         }
     }
     stop = clock();
@@ -96,22 +95,22 @@ PTIME_AA ptime){
 short generate_search_times(pfunc_search method, pfunc_key_generator generator,
 char order, char* file, int num_min, int num_max, int incr, int n_times){
 
-  int num, ntimes = (num_max - num_min)/incr + 1;
+  int num, i, ntimes = (num_max - num_min)/incr + 1;
   PTIME_AA ptimes;
 
   if(!(ptimes=malloc(sizeof(ptimes[0])*ntimes))){
     return ERR;
   }
 
-  for ( num = num_min; num <= num_max; num += incr)
+  for ( num = num_min, i = 0; num <= num_max; i++, num += incr)
   {
-    if(average_search_time(method, generator, order, num, n_times, ptimes)!=OK){
+    if(average_search_time(method, generator, order, num, n_times, &ptimes[i])!=OK){
       free(ptimes);
       return ERR;
     }
   }
   
-  if(save_time_table(file, ptimes, n_times)!= OK){
+  if(save_time_table(file, ptimes, ntimes)!= OK){
     free(ptimes);
     return ERR;
   }

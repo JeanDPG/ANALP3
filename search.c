@@ -77,7 +77,6 @@ PDICT init_dictionary (int size, char order)
 
 void free_dictionary(PDICT pdict)
 {
-  
   free(pdict->table);
   free(pdict);
 }
@@ -126,23 +125,27 @@ int search_dictionary(PDICT pdict, int key, int *ppos, pfunc_search method)
 }
 
 
-/* Search functions of the Dictionary ADT */
-int bin_search(int *table,int F,int L,int key, int *ppos)
-{
-	int m, ob = 0;
-  *ppos=NOT_FOUND;
-  m = floor((F-L)/2);
-  ob++;
-  if(key == table[m]){
-    *ppos = m;
-    return 0;
-  }
-  if(key > table[m]){
-    ob += bin_search(table, m+1, L, key, ppos);
-  }else{
-    ob += bin_search(table, F, m, key, ppos);
-  }
-  return ob;
+int bin_search(int *table, int F, int L, int key, int *ppos) {
+   int ob = 0;
+   int mid = (F + L) / 2;
+   
+    if (F > L) {
+        *ppos = NOT_FOUND;
+        return 1;  
+    }
+    
+    ob++;
+    if (table[mid] == key) {
+        *ppos = mid;
+        return ob;   
+    }
+
+     
+    if (key < table[mid]) {
+        return ob + bin_search(table, F, mid - 1, key, ppos);
+    } else {
+        return ob + bin_search(table, mid + 1, L, key, ppos);
+    }
 }
 
 int lin_search(int *table,int F,int L,int key, int *ppos)
@@ -155,10 +158,10 @@ int lin_search(int *table,int F,int L,int key, int *ppos)
     ob++;
     if(table[i] == key){
       *ppos = i;
+      return ob;
     }
   }
-  
-  return ob;
+  return 0;
 }
 
 int lin_auto_search(int *table,int F,int L,int key, int *ppos)

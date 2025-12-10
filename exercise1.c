@@ -54,7 +54,7 @@ int main(int argc, char** argv)
   }
  
   pdict = init_dictionary(size,NOT_SORTED);
-printf("Llegaste\n");
+
   if (pdict == NULL) {
     /* error */
     printf("Error: Dictionary could not be initialized\n");
